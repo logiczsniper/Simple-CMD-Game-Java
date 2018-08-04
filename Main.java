@@ -6,6 +6,7 @@ game graphics. The main purpose of the project was to give me a more hands on le
 
 
 package SimpleJavaGame;
+
 import java.util.Scanner;
 
 
@@ -44,9 +45,7 @@ class Boards {
         String output = String.format(this.baseBoard, " ", " ", "0", " ", "/", "O", "\\", "/", this.spikeZero, "\\",
                 this.spikeOne, this.spikeTwo, this.spikeThree, this.spikeFour);
 
-        if (spikePos == 0) {
-            output += "\n\nGAME OVER";
-        }
+        output = addFinalPart(spikePos, output);
 
         return output;
     }
@@ -58,9 +57,7 @@ class Boards {
         String output = String.format(this.baseBoard, " ", " ", "0", " ", "-", "O", "\\", "/", this.spikeZero, ")",
                 this.spikeOne, this.spikeTwo, this.spikeThree, this.spikeFour);
 
-        if (spikePos == 0) {
-            output += "\n\nGAME OVER";
-        }
+        output = addFinalPart(spikePos, output);
 
         return output;
     }
@@ -72,10 +69,17 @@ class Boards {
         String output = String.format(this.baseBoard, " ", " ", "0", " ", "/", "O", "-", "(", this.spikeZero, "\\",
                 this.spikeOne, this.spikeTwo, this.spikeThree, this.spikeFour);
 
+        output = addFinalPart(spikePos, (String) output);
+
+        return output;
+    }
+
+    private String addFinalPart(int spikePos, String output) {
         if (spikePos == 0) {
             output += "\n\nGAME OVER";
+        } else {
+            output += "Press 'SPACE' to prepare to jump and then 'ENTER' to jump!";
         }
-
         return output;
     }
 
@@ -106,14 +110,30 @@ class Boards {
     }
 }
 
-class Main {
+public class Main {
+
+    public static class MyThread extends Thread {
+
+        String search = " ";
+        Scanner user_input = new Scanner(System.in);
+
+        @Override
+        public void run() {
+            String input = this.user_input.nextLine();
+
+            if (input.indexOf(this.search) != -1) {
+                System.out.println("DONT BREEAK PLEASE");
+            }
+        }
+
+    }
 
     public static void runGame() {
 
         boolean gameEnd = false;
         int spikePos = 4;
         int counter = 0;
-        double playerMoveTimeFloat = 1000.00;
+        double playerMoveTimeFloat = 3000.00;
         Boards newBoard = new Boards();
         String[] mainBoards = {newBoard.getPlayerStand(4), newBoard.getPlayerRunOne(3),
                 newBoard.getPlayerStand(2), newBoard.getPlayerRunTwo(1),
@@ -122,18 +142,28 @@ class Main {
         while (gameEnd == false) {
 
             boolean hasBoardPrinted = false;
+            Thread myThread = new MyThread();
+
+            try {
+                if (mainBoards[counter].indexOf("GAME OVER") == -1) {
+                    myThread.start();
+                }
+            } catch (Exception e) {
+                ;
+            }
 
             try {
                 int playerMoveTime = (int) playerMoveTimeFloat;
                 Thread.sleep(playerMoveTime);
-                playerMoveTimeFloat = playerMoveTimeFloat * 0.95;
-            }
-            catch (InterruptedException ex) {
+                playerMoveTimeFloat = playerMoveTimeFloat * 0.985;
+                myThread.stop();
+            } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
 
-            // TODO: ignoring player jumps and damage, get a loop running using the four following game boards.
-            System.out.println(mainBoards[counter]);
+            // TODO: fix threads
+
+            System.out.println("\n\n" + mainBoards[counter]);
             hasBoardPrinted = true;
 
             if (mainBoards[counter].indexOf("GAME OVER") != -1) {
