@@ -43,6 +43,11 @@ class Boards {
 
         String output = String.format(this.baseBoard, " ", " ", "0", " ", "/", "O", "\\", "/", this.spikeZero, "\\",
                 this.spikeOne, this.spikeTwo, this.spikeThree, this.spikeFour);
+
+        if (spikePos == 0) {
+            output += "\n\nGAME OVER";
+        }
+
         return output;
     }
 
@@ -52,6 +57,11 @@ class Boards {
 
         String output = String.format(this.baseBoard, " ", " ", "0", " ", "-", "O", "\\", "/", this.spikeZero, ")",
                 this.spikeOne, this.spikeTwo, this.spikeThree, this.spikeFour);
+
+        if (spikePos == 0) {
+            output += "\n\nGAME OVER";
+        }
+
         return output;
     }
 
@@ -61,6 +71,11 @@ class Boards {
 
         String output = String.format(this.baseBoard, " ", " ", "0", " ", "/", "O", "-", "(", this.spikeZero, "\\",
                 this.spikeOne, this.spikeTwo, this.spikeThree, this.spikeFour);
+
+        if (spikePos == 0) {
+            output += "\n\nGAME OVER";
+        }
+
         return output;
     }
 
@@ -96,25 +111,42 @@ class Main {
     public static void runGame() {
 
         boolean gameEnd = false;
-        Object newBoard = new Boards();
+        int spikePos = 4;
+        int counter = 0;
+        double playerMoveTimeFloat = 1000.00;
+        Boards newBoard = new Boards();
+        String[] mainBoards = {newBoard.getPlayerStand(4), newBoard.getPlayerRunOne(3),
+                newBoard.getPlayerStand(2), newBoard.getPlayerRunTwo(1),
+                newBoard.getPlayerStand(0)};
 
         while (gameEnd == false) {
 
+            boolean hasBoardPrinted = false;
+
             try {
-                Thread.sleep(1500);
+                int playerMoveTime = (int) playerMoveTimeFloat;
+                Thread.sleep(playerMoveTime);
+                playerMoveTimeFloat = playerMoveTimeFloat * 0.95;
             }
             catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
 
             // TODO: ignoring player jumps and damage, get a loop running using the four following game boards.
+            System.out.println(mainBoards[counter]);
+            hasBoardPrinted = true;
 
-            System.out.println(((Boards) newBoard).getPlayerStand(4));
-            System.out.println(((Boards) newBoard).getPlayerRunOne(3));
-            System.out.println(((Boards) newBoard).getPlayerStand(2));
-            System.out.println(((Boards) newBoard).getPlayerRunTwo(1));
+            if (mainBoards[counter].indexOf("GAME OVER") != -1) {
+                gameEnd = true;
+            }
 
-            gameEnd = true;
+            if (spikePos > 0) {
+                spikePos--;
+                counter++;
+            } else if (spikePos == 0) {
+                spikePos = 4;
+                counter = 0;
+            }
         }
 
     }
