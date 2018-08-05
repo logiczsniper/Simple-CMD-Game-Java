@@ -78,7 +78,7 @@ class Boards {
         if (spikePos == 0) {
             output += "\n\nGAME OVER";
         } else {
-            output += "Press 'SPACE' to prepare to jump and then 'ENTER' to jump!";
+            output += "Press 'ENTER' to jump!";
         }
         return output;
     }
@@ -114,18 +114,28 @@ public class Main {
 
     public static class MyThread extends Thread {
 
-        String search = " ";
-        Scanner user_input = new Scanner(System.in);
+        Scanner user_input;
+
+        public MyThread() {
+            user_input = new Scanner(System.in);
+        }
 
         @Override
         public void run() {
             String input = this.user_input.nextLine();
 
-            if (input.indexOf(this.search) != -1) {
-                System.out.println("DONT BREEAK PLEASE");
+            if (input.isEmpty()) {
+                System.out.print("-You Leap Gracefully-");
             }
         }
+    }
 
+    public static void mySleep(int sleepTime) {
+        try {
+            Thread.sleep(sleepTime);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public static void runGame() {
@@ -133,41 +143,38 @@ public class Main {
         boolean gameEnd = false;
         int spikePos = 4;
         int counter = 0;
+        int level = 0;
         double playerMoveTimeFloat = 3000.00;
         Boards newBoard = new Boards();
         String[] mainBoards = {newBoard.getPlayerStand(4), newBoard.getPlayerRunOne(3),
                 newBoard.getPlayerStand(2), newBoard.getPlayerRunTwo(1),
-                newBoard.getPlayerStand(0)};
+                newBoard.getPlayerStand(1)};
+
+        System.out.println("\n\nLEVEL: 0");
+
+        mySleep(1);
 
         while (gameEnd == false) {
 
             boolean hasBoardPrinted = false;
-            Thread myThread = new MyThread();
-
-            try {
-                if (mainBoards[counter].indexOf("GAME OVER") == -1) {
-                    myThread.start();
-                }
-            } catch (Exception e) {
-                ;
-            }
-
-            try {
-                int playerMoveTime = (int) playerMoveTimeFloat;
-                Thread.sleep(playerMoveTime);
-                playerMoveTimeFloat = playerMoveTimeFloat * 0.985;
-                myThread.stop();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
-
-            // TODO: fix threads
-
             System.out.println("\n\n" + mainBoards[counter]);
             hasBoardPrinted = true;
+            MyThread myThread = new MyThread();
+
+            if (mainBoards[counter].indexOf("GAME OVER") == -1) {
+                myThread.start();
+            }
+
+            int playerMoveTime = (int) playerMoveTimeFloat;
+            mySleep(playerMoveTime);
+            playerMoveTimeFloat = playerMoveTimeFloat * 0.985;
+
+
+            myThread.stop();
 
             if (mainBoards[counter].indexOf("GAME OVER") != -1) {
                 gameEnd = true;
+                System.out.println("You made it to level " + level + ".");
             }
 
             if (spikePos > 0) {
@@ -176,6 +183,10 @@ public class Main {
             } else if (spikePos == 0) {
                 spikePos = 4;
                 counter = 0;
+                level++;
+                System.out.println("\n\nLEVEL: " + level);
+
+                mySleep(1);
             }
         }
 
