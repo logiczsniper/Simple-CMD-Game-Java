@@ -5,18 +5,16 @@ game graphics. The main purpose of the project was to give me a more hands on le
  */
 
 
-package SimpleJavaGame;
-
 import java.util.Scanner;
 
 
 class Boards {
-    String spikeZero = "_";
-    String spikeOne = " ";
-    String spikeTwo = " ";
-    String spikeThree = " ";
-    String spikeFour = " ";
-    String baseBoard = "" +
+    private String spikeZero = "_";
+    private String spikeOne = " ";
+    private String spikeTwo = " ";
+    private String spikeThree = " ";
+    private String spikeFour = " ";
+    private String baseBoard = "" +
             "|---------------------------|\n" +
             "|                           |\n" +
             "|                           |\n" +
@@ -30,7 +28,7 @@ class Boards {
             "|             %s             |\n" +
             "|---------------------------|\n";
 
-    public void resetSpikes() {
+    private void resetSpikes() {
         this.spikeZero = "_";
         this.spikeOne = " ";
         this.spikeTwo = " ";
@@ -38,7 +36,7 @@ class Boards {
         this.spikeFour = " ";
     }
 
-    public String getPlayerStand(int spikePos) {
+    String getPlayerStand(int spikePos) {
 
         prepareSpikes(spikePos);
 
@@ -50,7 +48,7 @@ class Boards {
         return output;
     }
 
-    public String getPlayerRunOne(int spikePos) {
+    String getPlayerRunOne(int spikePos) {
 
         prepareSpikes(spikePos);
 
@@ -62,14 +60,14 @@ class Boards {
         return output;
     }
 
-    public String getPlayerRunTwo(int spikePos) {
+    String getPlayerRunTwo(int spikePos) {
 
         prepareSpikes(spikePos);
 
         String output = String.format(this.baseBoard, " ", " ", "0", " ", "/", "O", "-", "(", this.spikeZero, "\\",
                 this.spikeOne, this.spikeTwo, this.spikeThree, this.spikeFour);
 
-        output = addFinalPart(spikePos, (String) output);
+        output = addFinalPart(spikePos, output);
 
         return output;
     }
@@ -87,9 +85,8 @@ class Boards {
 
         prepareSpikes(spikePos);
 
-        String output = String.format(this.baseBoard, "0", "\\", "O", "/", "<", " ", ">", "_", this.spikeZero, "_",
+        return String.format(this.baseBoard, "0", "\\", "O", "/", "<", " ", ">", "_", this.spikeZero, "_",
                 this.spikeOne, this.spikeTwo, this.spikeThree, this.spikeFour);
-        return output;
     }
 
     private void prepareSpikes(int spikePos) {
@@ -116,12 +113,9 @@ public class Main {
 
         Scanner user_input;
 
-        public MyThread() {
-            user_input = new Scanner(System.in);
-        }
-
         @Override
         public void run() {
+            user_input = new Scanner(System.in);
             String input = this.user_input.nextLine();
 
             if (input.isEmpty()) {
@@ -130,7 +124,7 @@ public class Main {
         }
     }
 
-    public static void mySleep(int sleepTime) {
+    private static void mySleep(int sleepTime) {
         try {
             Thread.sleep(sleepTime);
         } catch (InterruptedException ex) {
@@ -138,7 +132,7 @@ public class Main {
         }
     }
 
-    public static void runGame() {
+    private static void runGame() {
 
         boolean gameEnd = false;
         int spikePos = 4;
@@ -154,14 +148,14 @@ public class Main {
 
         mySleep(1);
 
-        while (gameEnd == false) {
+        while (!gameEnd) {
 
-            boolean hasBoardPrinted = false;
+            // boolean hasBoardPrinted = false;
             System.out.println("\n\n" + mainBoards[counter]);
-            hasBoardPrinted = true;
+            // hasBoardPrinted = true;
             MyThread myThread = new MyThread();
 
-            if (mainBoards[counter].indexOf("GAME OVER") == -1) {
+            if (!mainBoards[counter].contains("GAME OVER")) {
                 myThread.start();
             }
 
@@ -169,10 +163,10 @@ public class Main {
             mySleep(playerMoveTime);
             playerMoveTimeFloat = playerMoveTimeFloat * 0.985;
 
-
+            //noinspection deprecation
             myThread.stop();
 
-            if (mainBoards[counter].indexOf("GAME OVER") != -1) {
+            if (mainBoards[counter].contains("GAME OVER")) {
                 gameEnd = true;
                 System.out.println("You made it to level " + level + ".");
             }
@@ -198,7 +192,7 @@ public class Main {
         String input = user_input.nextLine();
         String search = " ";
 
-        if (input.indexOf(search) != -1) {
+        if (input.contains(search)) {
             runGame();
         }
     }
