@@ -111,16 +111,27 @@ public class Main {
 
     public static class MyThread extends Thread {
 
-        Scanner user_input;
+        Scanner user_input = new Scanner(System.in);
+        boolean stopLooping = false;
+        boolean canJump = true;
 
         @Override
         public void run() {
-            user_input = new Scanner(System.in);
-            String input = this.user_input.nextLine();
 
-            if (input.isEmpty()) {
-                System.out.print("-You Leap Gracefully-");
+            while (!stopLooping) {
+                System.out.print("");
+                if (this.canJump) {
+
+                    String input = this.user_input.nextLine();
+
+                    if (input.isEmpty()) {
+                        System.out.print("-You Leap Gracefully-");
+                        this.canJump = false;
+
+                    }
+                }
             }
+
         }
     }
 
@@ -145,29 +156,26 @@ public class Main {
                 newBoard.getPlayerStand(1)};
 
         System.out.println("\n\nLEVEL: 0");
+        MyThread myThread = new MyThread();
 
         mySleep(1);
+        myThread.start();
 
         while (!gameEnd) {
 
             // boolean hasBoardPrinted = false;
             System.out.println("\n\n" + mainBoards[counter]);
             // hasBoardPrinted = true;
-            MyThread myThread = new MyThread();
 
-            if (!mainBoards[counter].contains("GAME OVER")) {
-                myThread.start();
-            }
+            myThread.canJump = true;
 
             int playerMoveTime = (int) playerMoveTimeFloat;
             mySleep(playerMoveTime);
             playerMoveTimeFloat = playerMoveTimeFloat * 0.985;
 
-            //noinspection deprecation
-            myThread.stop();
-
             if (mainBoards[counter].contains("GAME OVER")) {
                 gameEnd = true;
+                myThread.stop();
                 System.out.println("You made it to level " + level + ".");
             }
 
@@ -183,16 +191,14 @@ public class Main {
                 mySleep(1);
             }
         }
-
     }
 
     public static void main(String[] args) {
         System.out.println("\n\nWelcome to StickWor|d...\n\nPress 'SPACE' followed by 'ENTER' to start!\n\n");
         Scanner user_input = new Scanner(System.in);
         String input = user_input.nextLine();
-        String search = " ";
 
-        if (input.contains(search)) {
+        if (input.contains(" ")) {
             runGame();
         }
     }
