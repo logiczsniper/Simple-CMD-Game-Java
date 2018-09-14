@@ -48,26 +48,26 @@ class Boards {
         return output;
     }
 
-    String getPlayerRunOne(int spikePos) {
+    String getPlayerRunOne() {
 
-        prepareSpikes(spikePos);
+        prepareSpikes(3);
 
         String output = String.format(this.baseBoard, " ", " ", "0", " ", "-", "O", "\\", "/", this.spikeZero, ")",
                 this.spikeOne, this.spikeTwo, this.spikeThree, this.spikeFour);
 
-        output = addFinalPart(spikePos, output);
+        output = addFinalPart(3, output);
 
         return output;
     }
 
-    String getPlayerRunTwo(int spikePos) {
+    String getPlayerRunTwo() {
 
-        prepareSpikes(spikePos);
+        prepareSpikes(1);
 
         String output = String.format(this.baseBoard, " ", " ", "0", " ", "/", "O", "-", "(", this.spikeZero, "\\",
                 this.spikeOne, this.spikeTwo, this.spikeThree, this.spikeFour);
 
-        output = addFinalPart(spikePos, output);
+        output = addFinalPart(1, output);
 
         return output;
     }
@@ -81,7 +81,7 @@ class Boards {
         return output;
     }
 
-    public String getPlayerUp(int spikePos) {
+    String getPlayerUp(int spikePos) {
 
         prepareSpikes(spikePos);
 
@@ -114,6 +114,7 @@ public class Main {
         Scanner user_input = new Scanner(System.in);
         boolean stopLooping = false;
         boolean canJump = true;
+        boolean hasJumped = false;
 
         @Override
         public void run() {
@@ -125,10 +126,17 @@ public class Main {
                     String input = this.user_input.nextLine();
 
                     if (input.isEmpty()) {
-                        System.out.print("-You Leap Gracefully-");
-                        this.canJump = false;
+                        this.hasJumped = true;
+                        System.out.print("-You Will Leap Gracefully-");
+
+                        try {
+                            this.suspend();
+                        } catch (IllegalMonitorStateException ignored) {
+                        }
 
                     }
+                    this.canJump = false;
+                    this.hasJumped = false;
                 }
             }
 
@@ -146,14 +154,15 @@ public class Main {
     private static void runGame() {
 
         boolean gameEnd = false;
+        boolean jumpingBoard = false;
         int spikePos = 4;
         int counter = 0;
         int level = 0;
         double playerMoveTimeFloat = 3000.00;
         Boards newBoard = new Boards();
-        String[] mainBoards = {newBoard.getPlayerStand(4), newBoard.getPlayerRunOne(3),
-                newBoard.getPlayerStand(2), newBoard.getPlayerRunTwo(1),
-                newBoard.getPlayerStand(1)};
+        String[] mainBoards = {newBoard.getPlayerStand(4), newBoard.getPlayerRunOne(),
+                newBoard.getPlayerStand(2), newBoard.getPlayerRunTwo(),
+                newBoard.getPlayerStand(0)};
 
         System.out.println("\n\nLEVEL: 0");
         MyThread myThread = new MyThread();
@@ -163,21 +172,31 @@ public class Main {
 
         while (!gameEnd) {
 
-            // boolean hasBoardPrinted = false;
-            System.out.println("\n\n" + mainBoards[counter]);
-            // hasBoardPrinted = true;
+            if (!jumpingBoard) {
+                System.out.println("\n\n" + mainBoards[counter]);
+
+                if (mainBoards[counter].contains("GAME OVER")) {
+                    gameEnd = true;
+                    myThread.stop();
+                    System.out.println("You made it to level " + level + ".");
+                }
+
+            } else {
+                System.out.println("\n\n" + newBoard.getPlayerUp(spikePos));
+            }
 
             myThread.canJump = true;
 
             int playerMoveTime = (int) playerMoveTimeFloat;
             mySleep(playerMoveTime);
-            playerMoveTimeFloat = playerMoveTimeFloat * 0.985;
 
-            if (mainBoards[counter].contains("GAME OVER")) {
-                gameEnd = true;
-                myThread.stop();
-                System.out.println("You made it to level " + level + ".");
-            }
+            jumpingBoard = myThread.hasJumped;
+
+            try {
+                myThread.resume();
+            } catch (IllegalMonitorStateException ignored) {}
+
+            playerMoveTimeFloat = playerMoveTimeFloat * 0.985;
 
             if (spikePos > 0) {
                 spikePos--;
@@ -186,7 +205,10 @@ public class Main {
                 spikePos = 4;
                 counter = 0;
                 level++;
-                System.out.println("\n\nLEVEL: " + level);
+
+                if (!gameEnd) {
+                    System.out.println("\n\nLEVEL: " + level);
+                }
 
                 mySleep(1);
             }
